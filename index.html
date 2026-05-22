@@ -1678,26 +1678,51 @@
       });
     });
 
-    /* --- Contact form (visual only, no backend) --- */
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
+    /* --- Contact form — Formspree --- */
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
       const note = document.getElementById('formNote');
-      btn.textContent = '✓ Mensaje enviado';
-      btn.style.background = 'rgba(63,185,80,0.2)';
-      btn.style.borderColor = 'var(--accent-green)';
-      btn.style.color = 'var(--accent-green)';
-      note.textContent = '¡Gracias! Te contactaré pronto.';
-      note.style.color = 'var(--accent-green)';
-      setTimeout(() => {
-        btn.textContent = 'Enviar mensaje →';
-        btn.style.background = '';
-        btn.style.borderColor = '';
-        btn.style.color = '';
-        note.textContent = 'Te responderé en menos de 24 horas';
-        note.style.color = '';
-        this.reset();
-      }, 3500);
+      const data = new FormData(this);
+
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('https://formspree.io/f/xaqkjwdw', {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          btn.textContent = '✓ Mensaje enviado';
+          btn.style.background = 'rgba(63,185,80,0.2)';
+          btn.style.borderColor = 'var(--accent-green)';
+          btn.style.color = 'var(--accent-green)';
+          note.textContent = '¡Gracias! Te contactaré pronto.';
+          note.style.color = 'var(--accent-green)';
+          this.reset();
+          setTimeout(() => {
+            btn.textContent = 'Enviar mensaje →';
+            btn.style.cssText = '';
+            note.textContent = 'Te responderé en menos de 24 horas';
+            note.style.color = '';
+            btn.disabled = false;
+          }, 3500);
+        } else {
+          throw new Error();
+        }
+      } catch {
+        btn.textContent = 'Error — intenta de nuevo';
+        btn.style.borderColor = '#f85149';
+        btn.style.color = '#f85149';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = 'Enviar mensaje →';
+          btn.style.cssText = '';
+        }, 3000);
+      }
     });
   </script>
 </body>
